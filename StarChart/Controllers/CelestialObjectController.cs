@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using StarChart.Data;
+using StarChart.Models;
 
 namespace StarChart.Controllers
 {
@@ -62,6 +63,68 @@ namespace StarChart.Controllers
             }
 
             return Ok(results);
+        }
+
+        [HttpPost]
+        public IActionResult Create([FromBody]CelestialObject newCelestialObject)
+        {
+            _context.CelestialObjects.Add(newCelestialObject);
+            _context.SaveChanges();
+
+            return CreatedAtRoute("GetById", new { id = newCelestialObject.Id }, newCelestialObject);
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult Update(int id, CelestialObject celestialObject)
+        {
+            var existingCelestialObject = _context.CelestialObjects.FirstOrDefault(x => x.Id == id);
+
+            if (existingCelestialObject == null)
+            {
+                return NotFound();
+            }
+            existingCelestialObject.Name = celestialObject.Name;
+            existingCelestialObject.OrbitalPeriod = celestialObject.OrbitalPeriod;
+            existingCelestialObject.OrbitedObjectId = celestialObject.OrbitedObjectId;
+
+            _context.CelestialObjects.Update(existingCelestialObject);
+            _context.SaveChanges();
+
+            return NoContent();
+        }
+
+        [HttpPatch("{id}/{name}")]
+        public IActionResult RenameObject(int id, string name)
+        {
+            var existingCelestialObject = _context.CelestialObjects.FirstOrDefault(x => x.Id == id);
+
+            if (existingCelestialObject == null)
+            {
+                return NotFound();
+            }
+
+            existingCelestialObject.Name = name;
+
+            _context.CelestialObjects.Update(existingCelestialObject);
+            _context.SaveChanges();
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            var existingCelestialObject = _context.CelestialObjects.FirstOrDefault(x => x.Id == id);
+
+            if (existingCelestialObject == null)
+            {
+                return NotFound();
+            }
+
+            _context.CelestialObjects.Remove(existingCelestialObject);
+            _context.SaveChanges();
+
+            return NoContent();
         }
     }
 }
